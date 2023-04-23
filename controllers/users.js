@@ -1,9 +1,15 @@
 const User = require('../models/user');
+const {
+  ERROR_BAD_REQUEST,
+  ERROR_NOT_FOUND,
+  ERROR_DEFAULT,
+  errorMessage,
+} = require('../utils/error');
 
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка с получением пользователей' }));
+    .catch(() => errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при получении пользователей'));
 };
 
 const getUserOnId = (req, res) => {
@@ -16,9 +22,9 @@ const getUserOnId = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.message === 'ErrorId') {
-        res.status(404).send({ message: 'Произошла ошибка пользователь не найден' });
+        errorMessage(res, ERROR_NOT_FOUND, 'Произошла ошибка: пользователь не найден');
       } else {
-        res.status(500).send({ message: 'Произошла ошибка при получении пользователя' });
+        errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при получении пользователя');
       }
     });
 };
@@ -30,9 +36,9 @@ const createUser = (req, res) => {
     .then((user) => res.status(201).send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Произошла ошибка, введены некорректные данные' });
+        errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: введены некорректные данные');
       } else {
-        res.status(500).send({ message: 'Произошла ошибка при создании пользователя' });
+        errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при создании пользователя');
       }
     });
 };
@@ -48,11 +54,11 @@ const updateUserInfo = (req, res) => {
     .then((userInfo) => res.status(201).send({ data: userInfo }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Произошла ошибка, введены некорректные данные' });
+        errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: введены некорректные данные');
       } else if (err.message === 'ErrorId') {
-        res.status(404).send({ message: 'Произошла ошибка пользователь с указанным id не найден' });
+        errorMessage(res, ERROR_NOT_FOUND, 'Произошла ошибка: пользователь с указанным id не найден');
       } else {
-        res.status(500).send({ message: 'Произошла ошибка при обновлении профиля' });
+        errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при обновлении профиля');
       }
     });
 };
@@ -68,11 +74,11 @@ const updateUserAvatar = (req, res) => {
     .then((userInfo) => res.status(201).send({ data: userInfo }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Произошла ошибка, введены некорректные данные' });
+        errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: введены некорректные данные');
       } else if (err.message === 'ErrorId') {
-        res.status(404).send({ message: 'Произошла ошибка пользователь с указанным id не найден' });
+        errorMessage(res, ERROR_NOT_FOUND, 'Произошла ошибка: пользователь с указанным id не найден');
       } else {
-        res.status(500).send({ message: 'Произошла ошибка при обновлении аварки профиля' });
+        errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при обновлении аварки профиля');
       }
     });
 };
