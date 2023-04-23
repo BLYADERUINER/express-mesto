@@ -16,9 +16,14 @@ const getUserOnId = (req, res) => {
   const { userId } = req.params;
 
   User.findById(userId)
+    .orFail(() => {
+      throw new Error('ErrorId');
+    })
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
+        errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: некорректный запрос');
+      } else if (err.message === 'ErrorId') {
         errorMessage(res, ERROR_NOT_FOUND, 'Произошла ошибка: пользователь не найден');
       } else {
         errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при получении пользователя');
@@ -51,7 +56,7 @@ const updateUserInfo = (req, res) => {
     .then((userInfo) => res.status(200).send({ data: userInfo }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: введены некорректные данные');
+        errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: некорректный запрос');
       } else if (err.message === 'ErrorId') {
         errorMessage(res, ERROR_NOT_FOUND, 'Произошла ошибка: пользователь с указанным id не найден');
       } else {
@@ -71,7 +76,7 @@ const updateUserAvatar = (req, res) => {
     .then((userInfo) => res.status(200).send({ data: userInfo }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: введены некорректные данные');
+        errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: некорректный запрос');
       } else if (err.message === 'ErrorId') {
         errorMessage(res, ERROR_NOT_FOUND, 'Произошла ошибка: пользователь с указанным id не найден');
       } else {

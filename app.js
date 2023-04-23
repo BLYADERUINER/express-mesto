@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
+const { ERROR_NOT_FOUND, errorMessage } = require('./utils/error');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -19,6 +20,9 @@ app.use((req, res, next) => {
 
 app.use(userRouter);
 app.use(cardRouter);
+app.use('*', (req, res) => {
+  errorMessage(res, ERROR_NOT_FOUND, 'Произошла ошибка: Запрос не найден');
+});
 
 app.listen(PORT, () => {
   console.log(`Server started on ${PORT} port`);
