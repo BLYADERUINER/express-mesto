@@ -55,7 +55,9 @@ const likeCard = (req, res) => {
     })
     .then((likes) => res.status(200).send({ data: likes }))
     .catch((err) => {
-      if (err.message === 'ErrorId') {
+      if (err.name === 'CastError') {
+        errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: переданы некорректные данные');
+      } else if (err.message === 'ErrorId') {
         errorMessage(res, ERROR_NOT_FOUND, 'Произошла ошибка: карточка не найдена');
       } else {
         errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при запросе на лайк');
@@ -74,7 +76,9 @@ const dislikeCard = (req, res) => {
     })
     .then((likes) => res.status(200).send({ data: likes }))
     .catch((err) => {
-      if (err.message === 'ErrorId') {
+      if (err.name === 'CastError') {
+        errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: переданы некорректные данные');
+      } else if (err.message === 'ErrorId') {
         errorMessage(res, ERROR_NOT_FOUND, 'Произошла ошибка: карточка не найдена');
       } else {
         errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при запросе на дизлайк');

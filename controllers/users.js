@@ -8,7 +8,7 @@ const {
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.send({ data: users }))
+    .then((users) => res.status(200).send({ data: users }))
     .catch(() => errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при получении пользователей'));
 };
 
@@ -16,12 +16,9 @@ const getUserOnId = (req, res) => {
   const { userId } = req.params;
 
   User.findById(userId)
-    .orFail(() => {
-      throw new Error('ErrorId');
-    })
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
-      if (err.message === 'ErrorId') {
+      if (err.name === 'CastError') {
         errorMessage(res, ERROR_NOT_FOUND, 'Произошла ошибка: пользователь не найден');
       } else {
         errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при получении пользователя');
@@ -47,11 +44,11 @@ const updateUserInfo = (req, res) => {
   const owner = req.user._id;
   const { name, about } = req.body;
 
-  User.findByIdAndUpdate(owner, { name, about })
+  User.findByIdAndUpdate(owner, { name, about }, { new: true, runValidators: true })
     .orFail(() => {
       throw new Error('ErrorId');
     })
-    .then((userInfo) => res.status(201).send({ data: userInfo }))
+    .then((userInfo) => res.status(200).send({ data: userInfo }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: введены некорректные данные');
@@ -67,11 +64,11 @@ const updateUserAvatar = (req, res) => {
   const owner = req.user._id;
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(owner, { avatar })
+  User.findByIdAndUpdate(owner, { avatar }, { new: true })
     .orFail(() => {
       throw new Error('ErrorId');
     })
-    .then((userInfo) => res.status(201).send({ data: userInfo }))
+    .then((userInfo) => res.status(200).send({ data: userInfo }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: введены некорректные данные');
