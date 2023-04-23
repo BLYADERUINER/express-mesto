@@ -18,7 +18,7 @@ const getUserOnId = (req, res) => {
       if (err.message === 'ErrorId') {
         res.status(404).send({ message: 'Произошла ошибка пользователь не найден' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка с получением пользователя' });
+        res.status(500).send({ message: 'Произошла ошибка при получении пользователя' });
       }
     });
 };
@@ -32,7 +32,47 @@ const createUser = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Произошла ошибка, введены некорректные данные' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка при отправке информации о пользователе' });
+        res.status(500).send({ message: 'Произошла ошибка при создании пользователя' });
+      }
+    });
+};
+
+const updateUserInfo = (req, res) => {
+  const owner = req.user._id;
+  const { name, about } = req.body;
+
+  User.findByIdAndUpdate(owner, { name, about })
+    .orFail(() => {
+      throw new Error('ErrorId');
+    })
+    .then((userInfo) => res.status(201).send({ data: userInfo }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Произошла ошибка, введены некорректные данные' });
+      } else if (err.message === 'ErrorId') {
+        res.status(404).send({ message: 'Произошла ошибка пользователь с указанным id не найден' });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка при обновлении профиля' });
+      }
+    });
+};
+
+const updateUserAvatar = (req, res) => {
+  const owner = req.user._id;
+  const { avatar } = req.body;
+
+  User.findByIdAndUpdate(owner, { avatar })
+    .orFail(() => {
+      throw new Error('ErrorId');
+    })
+    .then((userInfo) => res.status(201).send({ data: userInfo }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Произошла ошибка, введены некорректные данные' });
+      } else if (err.message === 'ErrorId') {
+        res.status(404).send({ message: 'Произошла ошибка пользователь с указанным id не найден' });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка при обновлении аварки профиля' });
       }
     });
 };
@@ -41,4 +81,6 @@ module.exports = {
   getUsers,
   getUserOnId,
   createUser,
+  updateUserInfo,
+  updateUserAvatar,
 };
