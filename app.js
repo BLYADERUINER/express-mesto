@@ -1,8 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const userRouter = require('./routes/users');
-const cardRouter = require('./routes/cards');
-const { ERROR_NOT_FOUND, errorMessage } = require('./utils/error');
+const { userRouter, cardRouter } = require('./routes/index');
+const { ERROR_NOT_FOUND, responseMessage } = require('./utils/statuscode');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -18,10 +17,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(userRouter);
-app.use(cardRouter);
+app.use('/users', userRouter);
+app.use('/cards', cardRouter);
 app.use('*', (req, res) => {
-  errorMessage(res, ERROR_NOT_FOUND, 'Произошла ошибка: Запрос не найден');
+  responseMessage(res, ERROR_NOT_FOUND, { message: 'Произошла ошибка: Запрос не найден' });
 });
 
 app.listen(PORT, () => {

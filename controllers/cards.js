@@ -1,15 +1,21 @@
+const mongoose = require('mongoose');
+
+const { CastError, ValidationError } = mongoose.Error;
 const Card = require('../models/card');
 const {
+  RESPONSE_OK,
+  RESPONSE_CREATED,
   ERROR_BAD_REQUEST,
   ERROR_NOT_FOUND,
   ERROR_DEFAULT,
-  errorMessage,
-} = require('../utils/error');
+  responseMessage,
+} = require('../utils/statuscode');
 
 const getCards = (req, res) => {
   Card.find({})
-    .then((users) => res.status(200).send({ data: users }))
-    .catch(() => errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при получении карточек'));
+    .populate(['owner', 'likes'])
+    .then((users) => responseMessage(res, RESPONSE_OK, { data: users }))
+    .catch(() => responseMessage(res, ERROR_DEFAULT, { message: 'Произошла ошибка при получении карточек' }));
 };
 
 const createCard = (req, res) => {
@@ -17,12 +23,12 @@ const createCard = (req, res) => {
   const owner = req.user._id;
 
   Card.create({ name, link, owner })
-    .then((card) => res.status(201).send({ data: card }))
+    .then((card) => responseMessage(res, RESPONSE_CREATED, { data: card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: введены некорректные данные');
+      if (err instanceof ValidationError) {
+        responseMessage(res, ERROR_BAD_REQUEST, { message: 'Произошла ошибка: введены некорректные данные' });
       } else {
-        errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при создании карточки');
+        responseMessage(res, ERROR_DEFAULT, { message: 'Произошла ошибка при создании карточки' });
       }
     });
 };
@@ -34,14 +40,14 @@ const deleteCard = (req, res) => {
     .orFail(() => {
       throw new Error('ErrorId');
     })
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => responseMessage(res, RESPONSE_OK, { data: card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: некорректный запрос');
+      if (err instanceof CastError) {
+        responseMessage(res, ERROR_BAD_REQUEST, { message: 'Произошла ошибка: некорректный запрос' });
       } else if (err.message === 'ErrorId') {
-        errorMessage(res, ERROR_NOT_FOUND, 'Произошла ошибка: карточка не найдена');
+        responseMessage(res, ERROR_NOT_FOUND, { message: 'Произошла ошибка: карточка не найдена' });
       } else {
-        errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при запросе на удаление');
+        responseMessage(res, ERROR_DEFAULT, { message: 'Произошла ошибка при запросе на удаление' });
       }
     });
 };
@@ -55,14 +61,14 @@ const likeCard = (req, res) => {
     .orFail(() => {
       throw new Error('ErrorId');
     })
-    .then((likes) => res.status(200).send({ data: likes }))
+    .then((likes) => responseMessage(res, RESPONSE_OK, { data: likes }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: некорректный запрос');
+      if (err instanceof CastError) {
+        responseMessage(res, ERROR_BAD_REQUEST, { message: 'Произошла ошибка: некорректный запрос' });
       } else if (err.message === 'ErrorId') {
-        errorMessage(res, ERROR_NOT_FOUND, 'Произошла ошибка: карточка не найдена');
+        responseMessage(res, ERROR_NOT_FOUND, { message: 'Произошла ошибка: карточка не найдена' });
       } else {
-        errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при запросе на лайк');
+        responseMessage(res, ERROR_DEFAULT, { message: 'Произошла ошибка при запросе на лайк' });
       }
     });
 };
@@ -76,14 +82,14 @@ const dislikeCard = (req, res) => {
     .orFail(() => {
       throw new Error('ErrorId');
     })
-    .then((likes) => res.status(200).send({ data: likes }))
+    .then((likes) => responseMessage(res, RESPONSE_OK, { data: likes }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        errorMessage(res, ERROR_BAD_REQUEST, 'Произошла ошибка: некорректный запрос');
+      if (err instanceof CastError) {
+        responseMessage(res, ERROR_BAD_REQUEST, { message: 'Произошла ошибка: некорректный запрос' });
       } else if (err.message === 'ErrorId') {
-        errorMessage(res, ERROR_NOT_FOUND, 'Произошла ошибка: карточка не найдена');
+        responseMessage(res, ERROR_NOT_FOUND, { message: 'Произошла ошибка: карточка не найдена' });
       } else {
-        errorMessage(res, ERROR_DEFAULT, 'Произошла ошибка при запросе на дизлайк');
+        responseMessage(res, ERROR_DEFAULT, { message: 'Произошла ошибка при запросе на дизлайк' });
       }
     });
 };
