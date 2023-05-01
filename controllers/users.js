@@ -1,11 +1,15 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const { CastError, ValidationError } = mongoose.Error;
+const { NODE_ENV, JWT_SECRET } = process.env;
 const User = require('../models/user');
 const {
   RESPONSE_OK,
   RESPONSE_CREATED,
   ERROR_BAD_REQUEST,
+  ERROR_UNAUTHORIZED,
   ERROR_NOT_FOUND,
   ERROR_DEFAULT,
   responseMessage,
@@ -37,9 +41,22 @@ const getUserOnId = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
 
-  User.create({ name, about, avatar })
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
     .then((user) => responseMessage(res, RESPONSE_CREATED, { data: user }))
     .catch((err) => {
       if (err instanceof ValidationError) {
@@ -90,10 +107,34 @@ const updateUserAvatar = (req, res) => {
     });
 };
 
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'mega-super-puper-duper-secret-key', { expiresIn: '7d' });
+
+      res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true, sameSite: true });
+      res.send({ token });
+    })
+    .catch((err) => {
+      if (err.message === 'ErrorLogin') {
+        responseMessage(res, ERROR_UNAUTHORIZED, { message: 'Неправильные логин или пароль!' });
+      } else {
+        responseMessage(res, ERROR_DEFAULT, { message: 'Произошла ошибка во время аутентификации' });
+      }
+    });
+};
+
+// const getCurrentUser = (req, res) => {
+
+// };
+
 module.exports = {
   getUsers,
   getUserOnId,
   createUser,
   updateUserInfo,
   updateUserAvatar,
+  login,
 };
