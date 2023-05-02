@@ -5,10 +5,10 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
-const { login, createUser } = require('./controllers/users');
-const auth = require('./middlewares/auth');
-const { userRouter, cardRouter } = require('./routes/index');
 const checkedErrors = require('./middlewares/error');
+const auth = require('./middlewares/auth');
+const { login, createUser } = require('./controllers/users');
+const { userRouter, cardRouter } = require('./routes/index');
 const NotFoundError = require('./errors/not-found-err');
 
 const app = express();
@@ -29,8 +29,9 @@ app.use(cookieParser());
 app.post('/signin', login);
 app.post('/signup', createUser);
 
-app.use('/users', auth, userRouter);
-app.use('/cards', auth, cardRouter);
+app.use(auth);
+app.use('/users', userRouter);
+app.use('/cards', cardRouter);
 app.use('*', () => {
   throw new NotFoundError('Произошла ошибка: Запрос не найден');
 });

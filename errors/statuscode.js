@@ -10,10 +10,10 @@ const ERROR_DEFAULT = 500;
 const responseMessage = (res, status, answer) => res.status(status).send(answer);
 
 module.exports = {
+  ERROR_UNAUTHORIZED,
   RESPONSE_OK,
   RESPONSE_CREATED,
   ERROR_BAD_REQUEST,
-  ERROR_UNAUTHORIZED,
   ERROR_FORBIDDEN,
   ERROR_NOT_FOUND,
   ERROR_CONFLICT,
