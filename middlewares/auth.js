@@ -1,17 +1,16 @@
-const jwt = require('jsonwebtoken');
+// const jwt = require('jsonwebtoken');
+const { checkToken } = require('../utils/token');
 
-const auth = (req, res, next) => {
+function auth(req, res, next) {
   const token = req.cookies.jwt;
-  let payload;
+  const validToken = checkToken(token);
 
-  try {
-    payload = jwt.verify(token, 'mega-super-puper-duper-secret-key');
-  } catch (err) {
-    return res.status(401).send({ message: 'Необходима авторизация' });
+  if (!validToken) {
+    return res.status(403).send({ message: 'Доступ запрещен' });
   }
 
-  req.user = payload;
-  next();
-};
+  req.user = validToken;
+  return next();
+}
 
 module.exports = auth;

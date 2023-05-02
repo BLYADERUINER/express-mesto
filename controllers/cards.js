@@ -35,12 +35,20 @@ const createCard = (req, res) => {
 
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
+  const ownerId = req.user._id;
 
-  Card.findByIdAndRemove(cardId)
+  Card.findById(cardId)
     .orFail(() => {
       throw new Error('ErrorId');
     })
-    .then((card) => responseMessage(res, RESPONSE_OK, { data: card }))
+    .then((card) => {
+      if (ownerId === String(card.owner)) {
+        Card.findByIdAndDelete(cardId)
+          .then((data) => responseMessage(res, RESPONSE_OK, { data }));
+      } else {
+        throw new Error('ErrorId');
+      }
+    })
     .catch((err) => {
       if (err instanceof CastError) {
         responseMessage(res, ERROR_BAD_REQUEST, { message: 'Произошла ошибка: некорректный запрос' });

@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
 const { CastError, ValidationError } = mongoose.Error;
-const { NODE_ENV, JWT_SECRET } = process.env;
+const { generateToken } = require('../utils/token');
 const User = require('../models/user');
 const {
   RESPONSE_OK,
@@ -57,7 +56,15 @@ const createUser = (req, res) => {
       email,
       password: hash,
     }))
-    .then((user) => responseMessage(res, RESPONSE_CREATED, { data: user }))
+    .then((user) => {
+      responseMessage(res, RESPONSE_CREATED, {
+        _id: user._id,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      });
+    })
     .catch((err) => {
       if (err instanceof ValidationError) {
         responseMessage(res, ERROR_BAD_REQUEST, { message: 'Произошла ошибка: введены некорректные данные' });
@@ -112,7 +119,7 @@ const login = (req, res) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'mega-super-puper-duper-secret-key', { expiresIn: '7d' });
+      const token = generateToken({ _id: user._id });
 
       res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true, sameSite: true });
       res.send({ token });
@@ -126,13 +133,29 @@ const login = (req, res) => {
     });
 };
 
-// const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res) => {
+  const userId = req.user._id;
 
-// };
+  User.findById(userId)
+    .orFail(() => {
+      throw new Error('ErrorId');
+    })
+    .then((user) => responseMessage(res, RESPONSE_OK, { data: user }))
+    .catch((err) => {
+      if (err instanceof CastError) {
+        responseMessage(res, ERROR_BAD_REQUEST, { message: 'Произошла ошибка: некорректный запрос' });
+      } else if (err.message === 'ErrorId') {
+        responseMessage(res, ERROR_NOT_FOUND, { message: 'Произошла ошибка: пользователь не найден' });
+      } else {
+        responseMessage(res, ERROR_DEFAULT, { message: 'Произошла ошибка при получении пользователя' });
+      }
+    });
+};
 
 module.exports = {
   getUsers,
   getUserOnId,
+  getCurrentUser,
   createUser,
   updateUserInfo,
   updateUserAvatar,
