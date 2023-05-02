@@ -5,10 +5,11 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
-const { userRouter, cardRouter } = require('./routes/index');
-const { ERROR_NOT_FOUND, responseMessage } = require('./utils/statuscode');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const { userRouter, cardRouter } = require('./routes/index');
+const checkedErrors = require('./middlewares/error');
+const NotFoundError = require('./errors/not-found-err');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -30,9 +31,11 @@ app.post('/signup', createUser);
 
 app.use('/users', auth, userRouter);
 app.use('/cards', auth, cardRouter);
-app.use('*', (req, res) => {
-  responseMessage(res, ERROR_NOT_FOUND, { message: 'Произошла ошибка: Запрос не найден' });
+app.use('*', () => {
+  throw new NotFoundError('Произошла ошибка: Запрос не найден');
 });
+
+app.use(checkedErrors);
 
 app.listen(PORT, () => {
   console.log(`Server started on ${PORT} port`);

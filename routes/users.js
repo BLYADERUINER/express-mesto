@@ -12,8 +12,8 @@ const userRouter = express.Router();
 
 userRouter.get('/', getUsers);
 userRouter.post('/', createUser);
-userRouter.get('/:userId', getCurrentUser);
-userRouter.get('/me', getUserOnId);
+userRouter.get('/:userId', getUserOnId);
+userRouter.get('/me', getCurrentUser);
 userRouter.patch('/me', updateUserInfo);
 userRouter.patch('/me/avatar', updateUserAvatar);
 
