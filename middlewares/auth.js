@@ -1,13 +1,13 @@
 // const jwt = require('jsonwebtoken');
 const { checkToken } = require('../utils/token');
-const ForbiddenError = require('../errors/forbidden-err');
+const UnauthorizedError = require('../errors/bad-request-err');
 
 function auth(req, res, next) {
   const token = req.cookies.jwt;
   const validToken = checkToken(token);
 
   if (!validToken) {
-    throw new ForbiddenError('Произошла ошибка: Доступ запрещен');
+    throw new UnauthorizedError('Произошла ошибка: вы не авторизованы');
   }
 
   req.user = validToken;
