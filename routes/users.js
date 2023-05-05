@@ -13,7 +13,7 @@ const userRouter = express.Router();
 
 userRouter.get('/', getUsers);
 userRouter.get('/me', getCurrentUser);
-userRouter.get('/:userId', idValid, getUserOnId);
+userRouter.get('/:_id', idValid, getUserOnId);
 userRouter.patch('/me', infoUpdateValid, updateUserInfo);
 userRouter.patch('/me/avatar', avatarUpdateValid, updateUserAvatar);
 

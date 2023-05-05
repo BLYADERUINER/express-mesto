@@ -1,9 +1,6 @@
-const mongoose = require('mongoose');
-
-const { CastError, ValidationError } = mongoose.Error;
 const NotFoundError = require('../errors/not-found-err');
-const BadRequestError = require('../errors/bad-request-err');
 const ForbiddenError = require('../errors/forbidden-err');
+
 const Card = require('../models/card');
 const {
   RESPONSE_OK,
@@ -24,33 +21,23 @@ const createCard = (req, res, next) => {
 
   Card.create({ name, link, owner })
     .then((card) => responseMessage(res, RESPONSE_CREATED, { data: card }))
-    .catch((err) => {
-      if (err instanceof ValidationError) {
-        throw new BadRequestError('Произошла ошибка: введены некорректные данные');
-      }
-    })
     .catch(next);
 };
 
 const deleteCard = (req, res, next) => {
-  const { cardId } = req.params;
+  const { _id } = req.params;
   const ownerId = req.user._id;
 
-  Card.findById(cardId)
+  Card.findById(_id)
     .orFail(() => {
       throw new NotFoundError('Произошла ошибка: карточка не найдена');
     })
     .then((card) => {
       if (ownerId === String(card.owner)) {
-        Card.findByIdAndDelete(cardId)
+        Card.findByIdAndDelete(_id)
           .then((data) => responseMessage(res, RESPONSE_OK, { data }));
       } else {
         throw new ForbiddenError('Произошла ошибка: у вас нет прав на удаление');
-      }
-    })
-    .catch((err) => {
-      if (err instanceof CastError) {
-        throw new BadRequestError('Произошла ошибка: некорректный запрос');
       }
     })
     .catch(next);
@@ -58,7 +45,7 @@ const deleteCard = (req, res, next) => {
 
 const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    req.params._id,
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
@@ -66,17 +53,12 @@ const likeCard = (req, res, next) => {
       throw new NotFoundError('Произошла ошибка: карточка не найдена');
     })
     .then((likes) => responseMessage(res, RESPONSE_OK, { data: likes }))
-    .catch((err) => {
-      if (err instanceof CastError) {
-        throw new BadRequestError('Произошла ошибка: некорректный запрос');
-      }
-    })
     .catch(next);
 };
 
 const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    req.params._id,
     { $pull: { likes: req.user._id } },
     { new: true },
   )
@@ -84,11 +66,6 @@ const dislikeCard = (req, res, next) => {
       throw new NotFoundError('Произошла ошибка: карточка не найдена');
     })
     .then((likes) => responseMessage(res, RESPONSE_OK, { data: likes }))
-    .catch((err) => {
-      if (err instanceof CastError) {
-        throw new BadRequestError('Произошла ошибка: некорректный запрос');
-      }
-    })
     .catch(next);
 };
 
