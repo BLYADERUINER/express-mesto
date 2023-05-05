@@ -39,10 +39,17 @@ const cardValid = celebrate({
   }),
 });
 
+const idValid = celebrate({
+  params: Joi.object().keys({
+    _id: Joi.string().alphanum().length(24),
+  }),
+});
+
 module.exports = {
   userValid,
   infoUpdateValid,
   avatarUpdateValid,
   loginValid,
   cardValid,
+  idValid,
 };

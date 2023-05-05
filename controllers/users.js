@@ -5,6 +5,7 @@ const { CastError, ValidationError } = mongoose.Error;
 const ConflictError = require('../errors/conflict-err');
 const NotFoundError = require('../errors/not-found-err');
 const BadRequestError = require('../errors/bad-request-err');
+const UnauthorizedError = require('../errors/unauthorized-err');
 const { generateToken } = require('../utils/token');
 const User = require('../models/user');
 const {
@@ -109,6 +110,9 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
+    .orFail(() => {
+      throw new UnauthorizedError('Неправильные логин или пароль!');
+    })
     .then((user) => {
       const token = generateToken({ _id: user._id });
 
