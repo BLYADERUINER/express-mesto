@@ -62,10 +62,10 @@ const createUser = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (err instanceof ValidationError) {
-        throw new BadRequestError('Произошла ошибка: введены некорректные данные');
-      } else if (err.code === 11000) {
+      if (err.code === 11000) {
         throw new ConflictError('Пользователь с таким email уже существует');
+      } else if (err instanceof ValidationError) {
+        throw new BadRequestError('Произошла ошибка: введены некорректные данные');
       }
     })
     .catch(next);
