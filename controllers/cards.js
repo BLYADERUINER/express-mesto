@@ -33,11 +33,11 @@ const deleteCard = (req, res, next) => {
       throw new NotFoundError('Произошла ошибка: карточка не найдена');
     })
     .then((card) => {
-      if (ownerId === String(card.owner)) {
-        Card.findByIdAndDelete(_id)
-          .then((data) => responseMessage(res, RESPONSE_OK, { data }));
-      } else {
+      if (ownerId !== String(card.owner)) {
         throw new ForbiddenError('Произошла ошибка: у вас нет прав на удаление');
+      } else {
+        card.deleteOne();
+        responseMessage(res, RESPONSE_OK, { message: 'Карточка удалена' });
       }
     })
     .catch(next);

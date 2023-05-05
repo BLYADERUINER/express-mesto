@@ -1,4 +1,4 @@
-const express = require('express');
+const userRouter = require('express').Router();
 
 const { infoUpdateValid, avatarUpdateValid, idValid } = require('../middlewares/validate');
 const {
@@ -8,8 +8,6 @@ const {
   updateUserInfo,
   updateUserAvatar,
 } = require('../controllers/users');
-
-const userRouter = express.Router();
 
 userRouter.get('/', getUsers);
 userRouter.get('/me', getCurrentUser);

@@ -1,6 +1,5 @@
 const bcrypt = require('bcryptjs');
 
-const ConflictError = require('../errors/conflict-err');
 const NotFoundError = require('../errors/not-found-err');
 const { generateToken } = require('../utils/token');
 
@@ -57,11 +56,6 @@ const createUser = (req, res, next) => {
         email: user.email,
       });
     })
-    .catch((err) => {
-      if (err.code === 11000) {
-        throw new ConflictError('Пользователь с таким email уже существует');
-      }
-    })
     .catch(next);
 };
 
@@ -78,7 +72,7 @@ const updateUserAvatar = (req, res, next) => {
   const owner = req.user._id;
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(owner, { avatar }, { new: true })
+  User.findByIdAndUpdate(owner, { avatar }, { new: true, runValidators: true })
     .then((userInfo) => responseMessage(res, RESPONSE_OK, { data: userInfo }))
     .catch(next);
 };
@@ -90,8 +84,9 @@ const login = (req, res, next) => {
     .then((user) => {
       const token = generateToken({ _id: user._id });
 
-      res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true, sameSite: true });
-      res.send({ token });
+      res
+        .cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true, sameSite: true })
+        .send({ message: 'Авторизация прошла успешно' });
     })
     .catch(next);
 };

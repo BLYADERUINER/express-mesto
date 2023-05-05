@@ -1,4 +1,4 @@
-const express = require('express');
+const cardRouter = require('express').Router();
 
 const { cardValid, idValid } = require('../middlewares/validate');
 const {
@@ -8,8 +8,6 @@ const {
   likeCard,
   dislikeCard,
 } = require('../controllers/cards');
-
-const cardRouter = express.Router();
 
 cardRouter.get('/', getCards);
 cardRouter.post('/', cardValid, createCard);

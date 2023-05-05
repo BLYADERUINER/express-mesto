@@ -8,11 +8,7 @@ const { errors } = require('celebrate');
 
 const limiter = require('./utils/limiter');
 const checkedErrors = require('./middlewares/error');
-const auth = require('./middlewares/auth');
-const { login, createUser } = require('./controllers/users');
-const { userRouter, cardRouter } = require('./routes/index');
-const { userValid, loginValid } = require('./middlewares/validate');
-const RequestNotFound = require('./errors/request-not-found');
+const router = require('./routes/index');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -24,12 +20,7 @@ app.use(helmet());
 app.use(limiter);
 app.use(cookieParser());
 
-app.post('/signin', loginValid, login);
-app.post('/signup', userValid, createUser);
-
-app.use('/users', auth, userRouter);
-app.use('/cards', auth, cardRouter);
-app.use('*', auth, RequestNotFound);
+app.use(router);
 
 app.use(errors());
 app.use(checkedErrors);
