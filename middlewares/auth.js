@@ -7,7 +7,7 @@ function auth(req, res, next) {
   const validToken = checkToken(token);
 
   if (!validToken) {
-    next(new UnauthorizedError('Произошла ошибка: вы не авторизованы'));
+    return next(new UnauthorizedError('Произошла ошибка: вы не авторизованы'));
   }
 
   req.user = validToken;
